@@ -10,7 +10,7 @@ class Sql:
     def is_table_existed(self, id):
         """判断该电影的table是否存在"""
         cursor = self.db.cursor()
-        commond = f"show tables like '{id}'"
+        commond = f"show tables like 't{id}'"
         cursor.execute(commond)
         data = cursor.fetchone()
         if data is None:
@@ -21,14 +21,14 @@ class Sql:
     def create_table(self, id):
         """用于为电影创建新的table"""
         cursor = self.db.cursor()
-        commond = f"create table {id} (name varchar(255))"
+        commond = f"create table t{id} (name varchar(255))"
         cursor.execute(commond)
         self.db.commit()
 
     def is_commontor_existed(self, id, name):
         """判断该电影中该评论者是否已经被记录"""
         cursor = self.db.cursor()
-        commond = f"select * from {id} where name='{name}'"
+        commond = f"select * from t{id} where name='{name}'"
         cursor.execute(commond)
         data = cursor.fetchone()
         if data is None:
@@ -39,7 +39,7 @@ class Sql:
     def insert_commentor(self, id, name):
         """向该电影的数据库插入该评论者"""
         cursor = self.db.cursor()
-        commond = f"insert into {id} values ('{name}')"
+        commond = f"insert into t{id} values ('{name}')"
         cursor.execute(commond)
         self.db.commit()
 
