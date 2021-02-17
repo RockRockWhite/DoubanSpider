@@ -13,10 +13,10 @@ class Sql:
         commond = f"show tables like '{id}'"
         cursor.execute(commond)
         data = cursor.fetchone()
-        if data == None:
-            return True
-        else:
+        if data is None:
             return False
+        else:
+            return True
 
     def create_table(self, id):
         """用于为电影创建新的table"""
@@ -25,10 +25,30 @@ class Sql:
         cursor.execute(commond)
         self.db.commit()
 
+    def is_commontor_existed(self, id, name):
+        """判断该电影中该评论者是否已经被记录"""
+        cursor = self.db.cursor()
+        commond = f"select * from {id} where name='{name}'"
+        cursor.execute(commond)
+        data = cursor.fetchone()
+        if data is None:
+            return False
+        else:
+            return True
+
+    def insert_commentor(self, id, name):
+        """向该电影的数据库插入该评论者"""
+        cursor = self.db.cursor()
+        commond = f"insert into {id} values ('{name}')"
+        cursor.execute(commond)
+        self.db.commit()
+
 
 def main():
     sql = Sql()
     print(sql.is_table_existed("test4"))
+    print(sql.is_commontor_existed("test4", "wdnmd3"))
+    sql.insert_commentor("test4", "wdnmd3")
 
 
 if __name__ == '__main__':
