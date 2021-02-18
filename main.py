@@ -2,6 +2,8 @@
 from Spider import *
 from Sql import *
 import threading
+import time
+import hashlib
 
 # 初始化数据库
 sql = Sql()
@@ -12,21 +14,24 @@ done = 0
 
 def get_datas(id, bpage, epage):
     """用于爬取该电影在bpage~epage范围内的数据"""
-    for page in range(bpage - 1, epage + 1):
+    for page in range(bpage, epage + 1):
         # 处理每一页的评论者
         commonters = get_commonters(id, page)
         for commonter in commonters:
             # 跳过已注销账号
             if id == "[已注销]":
                 continue
-            if not sql.is_commontor_existed(id, commonter):
+            # 计算MD5
+            md5 = hashlib.md5(commonter.encode("utf-8"))
+            if not sql.is_commontor_existed(id, md5.hexdigest()):
                 # 该评论者之前未被记录,则记录
-                sql.insert_commentor(id, commonter)
+                sql.insert_commentor(id, md5.hexdigest())
         # 输出进度
         global done
         global pages_cnt
         done += 1
         print(f"{done}/{pages_cnt}")
+        time.sleep(10)
 
 
 def main():
@@ -36,7 +41,6 @@ def main():
     global id
     id = input("请输入影片id:")
     threadings_cnt = int(input("请输入使用的线程数:"))
-    1292001
     # 若该影片没有表格,则为其创建表格
     if not sql.is_table_existed(id):
         sql.create_table(id)
@@ -45,6 +49,7 @@ def main():
     pages_cnt = get_pages_cnt(id)
     # 分配每个线程爬取的页数
     pages_threading = pages_cnt // threadings_cnt
+
     # 分配线程爬取入库
     print(f"正在以{threadings_cnt}线程爬取{id}......")
     for cnt in range(threadings_cnt):
@@ -53,7 +58,7 @@ def main():
         if cnt == threadings_cnt - 1:
             # 最后一个线程要爬完
             epage = pages_cnt
-        # 创建线程
+            # 创建线程
         t = threading.Thread(target=get_datas, args=[id, bpage, epage])
         t.start()
 
